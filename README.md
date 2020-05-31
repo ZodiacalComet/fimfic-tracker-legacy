@@ -57,11 +57,11 @@ pipx install -e .
 
 First thing to do is add a story to the tracking list, since there is none at this point, you use the `track` command like so:
 
-<p align="center"><img src="https://i.imgur.com/sdah3UM.png"></p>
+<p align="center"><img src="https://i.imgur.com/BHa6Nr9.png"></p>
 
 It accepts an unlimited amount of arguments, which means that you can add multiple stories to the tracking list at the same time.
 
-<p align="center"><img src="https://i.imgur.com/Ox3bTad.png"></p>
+<p align="center"><img src="https://i.imgur.com/3xPVbHK.png"></p>
 
 The downloaded files end up in `~/.fimfic-tracker/downloads`
 
@@ -69,7 +69,7 @@ The downloaded files end up in `~/.fimfic-tracker/downloads`
 
 Now that you have some stories tracked, you can use the `download` command anytime to check for updates:
 
-<p align="center"><img src="https://i.imgur.com/0OgobCy.png"></p>
+<p align="center"><img src="https://i.imgur.com/feolL9v.png"></p>
 
 > Use with moderation, since the most probable you will end up making a lot of requests to page for each use.
 
