@@ -9,7 +9,7 @@ from .constants import (
     FIMFIC_BASE_URL,
     FIMFIC_TRACKER_DIR,
     KEYWORDS_TO_HIDE_ON_LIST,
-    TRAKER_FILE,
+    TRACKER_FILE,
     VALUE_TO_STATUS_NAME,
     EchoColor,
     StoryStatus,
@@ -28,27 +28,21 @@ from .funcs import (
 @click.version_option()
 @click.pass_context
 def main(ctx):
-    """An unnecessary CLI application for tracking Fimfiction stories.
-
-    By default "~/.fimfic-tracker" is the application's directory. It can
-    be changed with the FIMFIC_TRACKER_DIR environment variable.
-
-    Downloads are made in a "downloads" directory inside the application's
-    directory."""
-    if not FIMFIC_TRACKER_DIR.exists():
-        FIMFIC_TRACKER_DIR.mkdir(parents=True)
-
+    """An unnecessary CLI application for tracking Fimfiction stories."""
     if not DOWNLOAD_DIR.exists():
         DOWNLOAD_DIR.mkdir(parents=True)
 
-    if not TRAKER_FILE.exists():
-        TRAKER_FILE.touch()
+    if not TRACKER_FILE.exists():
+        if not TRACKER_FILE.parent.exists():
+            TRACKER_FILE.parent.mkdir(parents=True)
+
+        TRACKER_FILE.touch()
 
         save_to_track_file({})
 
     ctx.ensure_object(dict)
 
-    with TRAKER_FILE.open("r") as f:
+    with TRACKER_FILE.open("r") as f:
         ctx.obj["track-data"] = json.load(f)
 
 

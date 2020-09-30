@@ -12,7 +12,7 @@ from .constants import (
     DOWNLOAD_FORMAT,
     FIMFIC_BASE_URL,
     STATUS_CLASS_NAMES,
-    TRAKER_FILE,
+    TRACKER_FILE,
     EchoColor,
 )
 
@@ -146,7 +146,7 @@ def save_to_track_file(data: dict):
     Arguments:
         data {dict} -- Data to save to the track file.
     """
-    with TRAKER_FILE.open("w", encoding="utf-8") as f:
+    with TRACKER_FILE.open("w", encoding="utf-8") as f:
         json_dump(data, f, ensure_ascii=False, indent=2)
 
 
