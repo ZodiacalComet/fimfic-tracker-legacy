@@ -7,7 +7,6 @@ from .constants import (
     DOWNLOAD_DELAY,
     DOWNLOAD_DIR,
     FIMFIC_BASE_URL,
-    FIMFIC_TRACKER_DIR,
     KEYWORDS_TO_HIDE_ON_LIST,
     TRACKER_FILE,
     VALUE_TO_STATUS_NAME,
@@ -58,7 +57,7 @@ def track(ctx, urls, skip_download):
     for url in urls:
         if not url.startswith(f"{FIMFIC_BASE_URL}/story/"):
             click.secho(
-                f'"{url}" doesn\'t seem like an URL from Fimfiction.',
+                f'"{url}" doesn\'t seem like an URL from a Fimfiction story.',
                 fg=EchoColor.error,
             )
             continue
@@ -67,7 +66,7 @@ def track(ctx, urls, skip_download):
         if story_id in ctx.obj["track-data"]:
             title = ctx.obj["track-data"][story_id]["title"]
             msg = click.style(
-                f'You already have the story "{title}" ({story_id}) on the tracked list. '
+                f'You already have the story "{title}" ({story_id}) on the tracking list. '
                 "Do you want to overwrite it?",
                 fg=EchoColor.confirm_prompt,
             )
@@ -81,7 +80,7 @@ def track(ctx, urls, skip_download):
         save_to_track_file(ctx.obj["track-data"])
 
         click.secho(
-            f'"{data["title"]}" ({story_id}) has been added to the tracked list.',
+            f'"{data["title"]}" ({story_id}) has been added to the tracking list.',
             fg=EchoColor.success,
         )
 
@@ -95,12 +94,12 @@ def track(ctx, urls, skip_download):
 @click.argument("story-ids", nargs=-1)
 @click.pass_context
 def untrack(ctx, story_ids):
-    """Removes the stories of the given STORY_ID from the tracking list if they
-    exist."""
+    """Removes the stories of the given STORY_IDS from the tracking list if
+    they exist."""
     for story_id in story_ids:
         if story_id not in ctx.obj["track-data"]:
             click.secho(
-                f"There is no story of ID {story_id} on the tracked list.",
+                f"There is no story of ID {story_id} on the tracking list.",
                 fg=EchoColor.error,
             )
             continue
@@ -111,7 +110,7 @@ def untrack(ctx, story_ids):
         save_to_track_file(ctx.obj["track-data"])
 
         click.secho(
-            f'Successfully removed "{title}" ({story_id}) from the tracked list.',
+            f'Successfully removed "{title}" ({story_id}) from the tracking list.',
             fg=EchoColor.success,
         )
 
@@ -153,15 +152,13 @@ def _list(ctx):
 
 
 @main.command()
-@click.option(
-    "--force", is_flag=True, help="Force download all tracked stories.",
-)
+@click.option("--force", is_flag=True, help="Force download all tracked stories.")
 @click.pass_context
 def download(ctx, force):
     """Download all tracked stories that have updated.
 
-    If a story is registered as 'Completed', you will be asked if you still
-    want to check for an update on it."""
+    If a story is registered as any status other than 'Incomplete', you will be
+    asked if you still want to check for an update on it."""
     if not ctx.obj["track-data"]:
         click.secho("There are no tracked stories.", fg=EchoColor.error)
         return
@@ -180,9 +177,7 @@ def download(ctx, force):
                     fg=EchoColor.confirm_prompt,
                 )
                 if not click.confirm(msg):
-                    click.secho(
-                        "Skipping story.", fg=EchoColor.info,
-                    )
+                    click.secho("Skipping story.", fg=EchoColor.info)
                     click.echo()
                     continue
 
