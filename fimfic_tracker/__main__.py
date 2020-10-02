@@ -2,6 +2,7 @@ import json
 from time import sleep
 
 import click
+from requests import RequestException
 
 from .constants import (
     DOWNLOAD_DELAY,
@@ -187,9 +188,6 @@ def download(ctx, force):
             )
 
         page_data = get_story_data(tracker_data["url"], do_echoes=force)
-        # Saving the obtained data now to at least ensure saving completion
-        # status changes. The request is already made anyway, so why not.
-        ctx.obj["track-data"][story_id] = page_data
 
         if not has_an_update(page_data, tracker_data):
             click.secho("Story didn't have an update.", fg="bright_yellow")
@@ -200,9 +198,14 @@ def download(ctx, force):
                 click.echo()
                 continue
 
-        download_story(page_data)
-        click.echo()
+        try:
+            download_story(page_data)
+        except RequestException:
+            click.secho("Couldn't download story.", fg=EchoColor.error)
+        else:
+            ctx.obj["track-data"][story_id] = page_data
 
+        click.echo()
         sleep(DOWNLOAD_DELAY)
 
     save_to_track_file(ctx.obj["track-data"])

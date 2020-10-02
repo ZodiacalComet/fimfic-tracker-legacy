@@ -116,13 +116,15 @@ def download_story(story_data: dict):
     Arguments:
         story_data {dict} -- Data of the story to download.
     """
-    # TODO: Properly download file in chunks.
     click.secho("Downloading story...", fg=EchoColor.info)
-    req = requests.get(story_data["download-url"], allow_redirects=True)
     filename = (story_data["title"] + DOWNLOAD_FORMAT).translate(CHARACTER_CONVERSION)
 
-    with open(DOWNLOAD_DIR / filename, "wb") as f:
-        f.write(req.content)
+    # From: https://stackoverflow.com/a/16696317
+    with requests.get(story_data["download-url"], stream=True) as r:
+        r.raise_for_status()
+        with open(DOWNLOAD_DIR / filename, "wb") as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                f.write(chunk)
 
     click.secho(f'Saved as "{filename}"', fg=EchoColor.success)
 
