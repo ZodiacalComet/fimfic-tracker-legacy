@@ -1,4 +1,5 @@
 import json
+import re
 from time import sleep
 
 import click
@@ -6,7 +7,7 @@ from requests import ConnectionError
 
 from .config import DOWNLOAD_DELAY, DOWNLOAD_DIR, TRACKER_FILE, EchoColor
 from .constants import (
-    FIMFIC_BASE_URL,
+    FIMFIC_STORY_URL_REGEX,
     KEYWORDS_TO_HIDE_ON_LIST,
     VALUE_TO_STATUS_NAME,
     StoryStatus,
@@ -53,14 +54,16 @@ def track(ctx, urls, skip_download):
 
     If it is already tracked, you will be asked if you want to overwrite it."""
     for url in urls:
-        if not url.startswith(f"{FIMFIC_BASE_URL}/story/"):
+        match = re.match(FIMFIC_STORY_URL_REGEX, url)
+
+        if not match:
             click.secho(
                 f'"{url}" doesn\'t seem like an URL from a Fimfiction story.',
                 fg=EchoColor.error,
             )
             continue
 
-        story_id = url.split("/")[-2]
+        story_id = match.groupdict()["STORY_ID"]
         if story_id in ctx.obj["track-data"]:
             title = ctx.obj["track-data"][story_id]["title"]
             msg = click.style(

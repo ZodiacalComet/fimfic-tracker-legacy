@@ -3,6 +3,7 @@ from pathlib import Path
 
 FIMFIC_TRACKER_DIR = Path.home() / ".fimfic-tracker"
 FIMFIC_BASE_URL = "https://www.fimfiction.net"
+FIMFIC_STORY_URL_REGEX = r"https?://(?:www.)?fimfiction.net/story/(?P<STORY_ID>\d+)"
 
 KEYWORDS_TO_HIDE_ON_LIST = ["last-update-timestamp", "completion-status"]
 # Doesn't seem like they will change anytime soon, so hardcoded they are!
