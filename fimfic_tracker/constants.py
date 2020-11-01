@@ -1,4 +1,3 @@
-import sys
 from enum import Enum
 from pathlib import Path
 
@@ -6,6 +5,32 @@ FIMFIC_TRACKER_DIR = Path.home() / ".fimfic-tracker"
 FIMFIC_BASE_URL = "https://www.fimfiction.net"
 
 KEYWORDS_TO_HIDE_ON_LIST = ["last-update-timestamp", "completion-status"]
+# Doesn't seem like they will change anytime soon, so hardcoded they are!
+# Also avoids the little case where get_download_url doesn't return
+# anything. (funcs.py:65)
+VALID_DOWNLOAD_FORMATS = [".txt", ".html", ".epub"]
+# https://click.palletsprojects.com/en/7.x/api/#click.style
+VALID_ECHO_COLORS = [
+    "black",
+    "red",
+    "green",
+    "yellow",
+    "blue",
+    "magenta",
+    "cyan",
+    "white",
+    "bright_black",
+    "bright_red",
+    "bright_green",
+    "bright_yellow",
+    "bright_blue",
+    "bright_magenta",
+    "bright_cyan",
+    "bright_white",
+    "reset",
+]
+
+INVALID_SETTING_TYPE_MSG = "{0} can only be one of the following: {1}."
 
 
 class StoryStatus(Enum):
@@ -15,11 +40,12 @@ class StoryStatus(Enum):
     cancelled = 3
 
 
+CHARACTER_CONVERSION = {ord(c): "_" for c in '><:"|?*'}
+
 VALUE_TO_STATUS_NAME = {
     k: v.replace("_", " ").title()
     for k, v in map(lambda e: (e.value, e.name), StoryStatus)
 }
-
 
 STATUS_CLASS_NAMES = {
     "completed-status-complete": StoryStatus.completed,
@@ -27,38 +53,3 @@ STATUS_CLASS_NAMES = {
     "completed-status-hiatus": StoryStatus.on_hiatus,
     "completed-status-cancelled": StoryStatus.cancelled,
 }
-
-
-CHARACTER_CONVERSION = {ord(c): "_" for c in '><:"|?*'}
-
-# Configurable values
-
-CONFIG_FILE_LOCATIONS = [Path.home() / ".config" / "fimfic-tracker", FIMFIC_TRACKER_DIR]
-
-for path in reversed(CONFIG_FILE_LOCATIONS):
-    sys.path.insert(0, str(path))
-
-try:
-    import settings
-except ModuleNotFoundError:
-    settings = None
-
-DOWNLOAD_DIR = getattr(settings, "DOWNLOAD_DIR", FIMFIC_TRACKER_DIR / "downloads")
-TRACKER_FILE = getattr(settings, "TRACKER_FILE", FIMFIC_TRACKER_DIR / "track-data.json")
-
-DOWNLOAD_FORMAT = getattr(settings, "DOWNLOAD_FORMAT", ".txt")
-DOWNLOAD_DELAY = getattr(settings, "DOWNLOAD_DELAY", 1)
-
-
-# Color Names: https://click.palletsprojects.com/en/7.x/api/#click.style
-class EchoColor:
-    info = getattr(settings, "INFO_FG_COLOR", "bright_cyan")
-    success = getattr(settings, "SUCCESS_FG_COLOR", "bright_green")
-    error = getattr(settings, "ERROR_FG_COLOR", "bright_red")
-
-    confirm_prompt = getattr(settings, "CONFIRM_FG_COLOR", "bright_white")
-
-    # Value Highlights
-    hl_string = getattr(settings, "HIGHLIGHT_TEXT_COLOR", "bright_green")
-    hl_number = getattr(settings, "HIGHLIGHT_NUMBER_COLOR", "bright_blue")
-    hl_fallback = getattr(settings, "HIGHLIGHT_OTHER_COLOR", "bright_white")

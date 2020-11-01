@@ -6,15 +6,8 @@ import requests
 from bs4 import BeautifulSoup
 from dateparser import parse as dateparser_parse
 
-from .constants import (
-    CHARACTER_CONVERSION,
-    DOWNLOAD_DIR,
-    DOWNLOAD_FORMAT,
-    FIMFIC_BASE_URL,
-    STATUS_CLASS_NAMES,
-    TRACKER_FILE,
-    EchoColor,
-)
+from .config import DOWNLOAD_DIR, DOWNLOAD_FORMAT, TRACKER_FILE, EchoColor
+from .constants import CHARACTER_CONVERSION, FIMFIC_BASE_URL, STATUS_CLASS_NAMES
 
 
 def get_story_data(url: str, *, do_echoes=True) -> dict:

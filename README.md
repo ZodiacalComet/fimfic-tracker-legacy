@@ -106,7 +106,7 @@ Copy the following template, uncomment and edit to your preferences.
 #DOWNLOAD_FORMAT = ".txt"
 
 # The seconds to wait before advancing to the next story.
-# Type: int
+# Type: int or float
 #DOWNLOAD_DELAY = 1
 
 ## Colors

@@ -4,14 +4,11 @@ from time import sleep
 import click
 from requests import RequestException
 
+from .config import DOWNLOAD_DELAY, DOWNLOAD_DIR, TRACKER_FILE, EchoColor
 from .constants import (
-    DOWNLOAD_DELAY,
-    DOWNLOAD_DIR,
     FIMFIC_BASE_URL,
     KEYWORDS_TO_HIDE_ON_LIST,
-    TRACKER_FILE,
     VALUE_TO_STATUS_NAME,
-    EchoColor,
     StoryStatus,
 )
 from .funcs import (
