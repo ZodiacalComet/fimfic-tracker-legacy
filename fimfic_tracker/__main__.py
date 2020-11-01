@@ -2,7 +2,7 @@ import json
 from time import sleep
 
 import click
-from requests import RequestException
+from requests import ConnectionError
 
 from .config import DOWNLOAD_DELAY, DOWNLOAD_DIR, TRACKER_FILE, EchoColor
 from .constants import (
@@ -72,19 +72,26 @@ def track(ctx, urls, skip_download):
                 click.secho("Skipping story.", fg=EchoColor.info)
                 continue
 
-        data = get_story_data(url)
-        ctx.obj["track-data"][story_id] = data
+        try:
+            data = get_story_data(url)
+        except ConnectionError as err:
+            click.secho(f"Couldn't get data from '{url}'.\n{err}\n", fg=EchoColor.error)
+            continue
 
+        if not skip_download:
+            try:
+                download_story(data)
+            except ConnectionError as err:
+                click.secho(f"Couldn't download story.\n{err}\n", fg=EchoColor.error)
+                continue
+
+        ctx.obj["track-data"][story_id] = data
         save_to_track_file(ctx.obj["track-data"])
 
         click.secho(
             f'"{data["title"]}" ({story_id}) has been added to the tracking list.',
             fg=EchoColor.success,
         )
-
-        if not skip_download:
-            download_story(data)
-
         click.echo()
 
 
@@ -184,7 +191,11 @@ def download(ctx, force):
                 fg=EchoColor.info,
             )
 
-        page_data = get_story_data(tracker_data["url"], do_echoes=force)
+        try:
+            page_data = get_story_data(tracker_data["url"], do_echoes=force)
+        except ConnectionError as err:
+            click.secho(f"Couldn't check for story.\n{err}\n", fg=EchoColor.error)
+            continue
 
         if not has_an_update(page_data, tracker_data):
             click.secho("Story didn't have an update.", fg="bright_yellow")
@@ -197,8 +208,8 @@ def download(ctx, force):
 
         try:
             download_story(page_data)
-        except RequestException:
-            click.secho("Couldn't download story.", fg=EchoColor.error)
+        except ConnectionError as err:
+            click.secho(f"Couldn't download story.\n{err}\n", fg=EchoColor.error)
         else:
             ctx.obj["track-data"][story_id] = page_data
 
