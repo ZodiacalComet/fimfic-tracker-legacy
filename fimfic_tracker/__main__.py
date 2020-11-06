@@ -215,11 +215,10 @@ def download(ctx, force):
             click.secho(f"Couldn't download story.\n{err}\n", fg=EchoColor.error)
         else:
             ctx.obj["track-data"][story_id] = page_data
+            save_to_track_file(ctx.obj["track-data"])
 
         click.echo()
         sleep(DOWNLOAD_DELAY)
-
-    save_to_track_file(ctx.obj["track-data"])
 
 
 if __name__ == "__main__":
