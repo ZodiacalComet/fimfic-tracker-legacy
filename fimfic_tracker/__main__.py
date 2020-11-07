@@ -34,8 +34,6 @@ def main(ctx):
         if not TRACKER_FILE.parent.exists():
             TRACKER_FILE.parent.mkdir(parents=True)
 
-        TRACKER_FILE.touch()
-
         save_to_track_file({})
 
     ctx.ensure_object(dict)
