@@ -1,7 +1,5 @@
 from enum import Enum
-from pathlib import Path
 
-FIMFIC_TRACKER_DIR = Path.home() / ".fimfic-tracker"
 FIMFIC_BASE_URL = "https://www.fimfiction.net"
 FIMFIC_STORY_URL_REGEX = r"https?://(?:www.)?fimfiction.net/story/(?P<STORY_ID>\d+)"
 
@@ -30,8 +28,6 @@ VALID_ECHO_COLORS = [
     "bright_white",
     "reset",
 ]
-
-INVALID_SETTING_TYPE_MSG = "{0} can only be one of the following: {1}."
 
 
 class StoryStatus(Enum):
