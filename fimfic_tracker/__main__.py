@@ -63,6 +63,7 @@ def track(ctx, urls, skip_download):
             )
             continue
 
+        url = match.group()
         story_id = match.groupdict()["STORY_ID"]
         if story_id in ctx.obj["track-data"]:
             title = ctx.obj["track-data"][story_id]["title"]
