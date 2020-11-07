@@ -77,7 +77,9 @@ def track(ctx, urls, skip_download):
         try:
             data = get_story_data(url)
         except ConnectionError as err:
-            click.secho(f"Couldn't get data from '{url}'.\n{err}\n", fg=EchoColor.error)
+            click.secho(
+                f'Couldn\'t get data from "{url}".\n{err}\n', fg=EchoColor.error
+            )
             continue
 
         if not skip_download:

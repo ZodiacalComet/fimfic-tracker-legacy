@@ -30,7 +30,7 @@ def get_story_data(url: str, *, do_echoes=True) -> dict:
             - `completion-status` {int} -- StoryStatus enum value.
     """
     if do_echoes:
-        click.secho(f"Making a request to: {url}", fg=EchoColor.info)
+        click.secho(f'Making a request to "{url}"', fg=EchoColor.info)
 
     cookies = dict(view_mature="true")
     page_content = requests.get(url, cookies=cookies).content
