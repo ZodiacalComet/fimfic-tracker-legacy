@@ -7,7 +7,12 @@ from bs4 import BeautifulSoup
 from dateparser import parse as dateparser_parse
 
 from .config import DOWNLOAD_DIR, DOWNLOAD_FORMAT, TRACKER_FILE, EchoColor
-from .constants import CHARACTER_CONVERSION, FIMFIC_BASE_URL, STATUS_CLASS_NAMES
+from .constants import (
+    CHARACTER_CONVERSION,
+    FIMFIC_BASE_URL,
+    STATUS_CLASS_NAMES,
+    ConfirmState,
+)
 
 
 def get_story_data(url: str, *, do_echoes=True) -> dict:
@@ -163,3 +168,47 @@ def get_highlighted_value(value):
         return EchoColor.hl_fallback
 
     return click.style(str(value), fg=get_color(value))
+
+
+def get_confirm_state(assume_yes: bool, assume_no: bool) -> ConfirmState:
+    """Returns the state in which to manage the confirmation prompts from the
+    assume flag values.
+
+    Arguments:
+        assume_yes {bool} -- Option flag value.
+        assume_no {bool} -- Option flag value.
+
+    Returns:
+        ConfirmState -- The corresponding confirm state.
+    """
+    if assume_yes:
+        return ConfirmState.answer_yes
+    elif assume_no:
+        return ConfirmState.answer_no
+    else:
+        return ConfirmState.prompt
+
+
+def confirm(confirm_state: ConfirmState, confirm_msg: str) -> bool:
+    """Checks for the confirm state to take into account the use of assume
+    flags for confirmation prompts (yes/no questions). Allowing to
+    automatically answer them if requested.
+
+    To ensure that it works correctly, the confirm_state should be the result
+    of the get_confirm_state function.
+
+    Arguments:
+        confirm_state {ConfirmState} -- Whether to prompt the user or
+        automatically answer.
+        confirm_msg {str} -- Question to ask should the confirm_state be of
+        prompting the user.
+
+    Returns:
+        bool -- The answer to the confirmation prompt, with 'yes' being True
+        and 'no' being False.
+    """
+    if confirm_state == ConfirmState.answer_yes:
+        return True
+    elif confirm_state == ConfirmState.answer_no:
+        return False
+    return click.confirm(confirm_msg)

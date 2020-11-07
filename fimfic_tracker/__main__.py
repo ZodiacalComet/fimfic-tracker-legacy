@@ -10,10 +10,13 @@ from .constants import (
     FIMFIC_STORY_URL_REGEX,
     KEYWORDS_TO_HIDE_ON_LIST,
     VALUE_TO_STATUS_NAME,
+    ConfirmState,
     StoryStatus,
 )
 from .funcs import (
+    confirm,
     download_story,
+    get_confirm_state,
     get_date_from_timestamp,
     get_highlighted_value,
     get_story_data,
@@ -45,8 +48,13 @@ def main(ctx):
 @main.command(short_help="Tracks stories and downloads them.")
 @click.argument("urls", nargs=-1)
 @click.option("--skip-download", is_flag=True)
+@click.option(
+    "--overwrite",
+    is_flag=True,
+    help="Automatically answers the overwrite prompts with Y.",
+)
 @click.pass_context
-def track(ctx, urls, skip_download):
+def track(ctx, urls, skip_download, overwrite):
     """Adds the given story URLs to the tracking list and downloads them to the
     download folder.
 
@@ -63,7 +71,7 @@ def track(ctx, urls, skip_download):
 
         url = match.group()
         story_id = match.groupdict()["STORY_ID"]
-        if story_id in ctx.obj["track-data"]:
+        if not overwrite and story_id in ctx.obj["track-data"]:
             title = ctx.obj["track-data"][story_id]["title"]
             msg = click.style(
                 f'You already have the story "{title}" ({story_id}) on the tracking list. '
@@ -162,8 +170,20 @@ def _list(ctx):
 
 @main.command()
 @click.option("--force", is_flag=True, help="Force download all tracked stories.")
+@click.option(
+    "--assume-yes",
+    "--yes",
+    is_flag=True,
+    help="Automatically answers confirmation prompts with Y.",
+)
+@click.option(
+    "--assume-no",
+    "--no",
+    is_flag=True,
+    help="Automatically answers confirmation prompts with N.",
+)
 @click.pass_context
-def download(ctx, force):
+def download(ctx, force, assume_yes, assume_no):
     """Download all tracked stories that have updated.
 
     If a story is registered as any status other than 'Incomplete', you will be
@@ -171,6 +191,21 @@ def download(ctx, force):
     if not ctx.obj["track-data"]:
         click.secho("There are no tracked stories.", fg=EchoColor.error)
         return
+
+    if assume_yes and assume_no:
+        click.secho(
+            'The options "--assume-yes" and "--assume-no" cannot be used at the same time.',
+            fg=EchoColor.error,
+        )
+        return
+    if force and (assume_yes or assume_no):
+        click.secho(
+            'The option "--force" is not compatible with "--assume-yes" nor "--assume-no".',
+            fg=EchoColor.error,
+        )
+        return
+
+    confirm_state = get_confirm_state(assume_yes, assume_no)
 
     for story_id, tracker_data in ctx.obj["track-data"].items():
         title = tracker_data["title"]
@@ -185,8 +220,15 @@ def download(ctx, force):
                     "by the author. Do you want to still check for an update on it?",
                     fg=EchoColor.confirm_prompt,
                 )
-                if not click.confirm(msg):
-                    click.secho("Skipping story.", fg=EchoColor.info)
+                if not confirm(confirm_state, msg):
+                    if confirm_state == ConfirmState.answer_no:
+                        click.secho(
+                            f'Skipping "{title}" ({story_id}) marked as "{status_name}".',
+                            fg=EchoColor.info,
+                        )
+                    else:
+                        click.secho("Skipping story.", fg=EchoColor.info)
+
                     click.echo()
                     continue
 

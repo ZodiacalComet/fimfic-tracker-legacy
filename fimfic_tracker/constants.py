@@ -30,6 +30,12 @@ VALID_ECHO_COLORS = [
 ]
 
 
+class ConfirmState(Enum):
+    prompt = 0
+    answer_yes = 1
+    answer_no = 2
+
+
 class StoryStatus(Enum):
     completed = 0
     incomplete = 1
