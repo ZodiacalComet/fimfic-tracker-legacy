@@ -45,7 +45,7 @@ def get_echo_color(name, default):
     if value not in VALID_ECHO_COLORS:
         raise ValueError(
             INVALID_SETTING_TYPE_MSG.format(
-                name, ",".join(map(repr, VALID_ECHO_COLORS))
+                name, ", ".join(map(repr, VALID_ECHO_COLORS))
             )
         )
 
