@@ -232,13 +232,12 @@ def download(ctx, force, assume_yes, assume_no):
                     click.echo()
                     continue
 
-            click.secho(
-                f'Checking if "{title}" ({story_id}) had an update...',
-                fg=EchoColor.info,
-            )
+        click.secho(
+            f'Checking if "{title}" ({story_id}) had an update...', fg=EchoColor.info
+        )
 
         try:
-            page_data = get_story_data(tracker_data["url"], do_echoes=force)
+            page_data = get_story_data(tracker_data["url"], do_echoes=False)
         except ConnectionError as err:
             click.secho(f"Couldn't check for story.\n{err}\n", fg=EchoColor.error)
             continue
