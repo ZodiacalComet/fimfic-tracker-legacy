@@ -193,9 +193,10 @@ def _list(ctx, short):
     is_flag=True,
     help="Automatically answers confirmation prompts with N.",
 )
+@click.argument("story-ids", nargs=-1)
 @click.pass_context
-def download(ctx, force, assume_yes, assume_no):
-    """Download all tracked stories that have updated.
+def download(ctx, force, assume_yes, assume_no, story_ids):
+    """Download all or given STORY_IDS of tracked stories that have updated.
 
     If a story is registered as any status other than 'Incomplete', you will be
     asked if you still want to check for an update on it."""
@@ -218,7 +219,14 @@ def download(ctx, force, assume_yes, assume_no):
 
     confirm_state = get_confirm_state(assume_yes, assume_no)
 
-    for story_id, tracker_data in ctx.obj["track-data"].items():
+    def true_or_filter_ids(id_str: str) -> bool:
+        if not story_ids:
+            return True
+        return id_str in story_ids
+
+    for story_id, tracker_data in filter(
+        lambda t: true_or_filter_ids(t[0]), ctx.obj["track-data"].items()
+    ):
         title = tracker_data["title"]
         if not force:
             if not tracker_data["completion-status"] == StoryStatus.incomplete.value:
