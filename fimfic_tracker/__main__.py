@@ -133,11 +133,22 @@ def untrack(ctx, story_ids):
 
 
 @main.command("list")
+@click.option("--short", "-s", is_flag=True, help="Show only the story ID and title.")
 @click.pass_context
-def _list(ctx):
+def _list(ctx, short):
     """List all tracked stories."""
     if not ctx.obj["track-data"]:
         click.secho("There are no tracked stories.", fg=EchoColor.error)
+        return
+
+    if short:
+        for story_id, tracker_data in ctx.obj["track-data"].items():
+            click.secho(
+                "{0} {1}".format(
+                    click.style(f"[{story_id}]", fg="bright_cyan"),
+                    click.style(tracker_data["title"], fg=EchoColor.hl_string),
+                )
+            )
         return
 
     def echo_value(items):
