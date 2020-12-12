@@ -108,14 +108,49 @@ def has_an_update(page_data: dict, tracker_data: dict) -> bool:
     return False
 
 
+def get_size_str_from_bytes(size_bytes: int) -> str:
+    """Returns a human readable representation of given bytes.
+
+    Arguments:
+        size_bytes {int} -- Size in bytes.
+
+    Returns:
+        str -- String representation of given bytes.
+    """
+    for i, suffix in enumerate(["b", "Kb", "Mb", "Gb", "Tb"]):
+        size_bytes = size_bytes if i == 0 else (size_bytes / 1024)
+
+        if not size_bytes > 900:
+            break
+
+    return f"{size_bytes:.2f} {suffix}"
+
+
+def ljust_column_print(message: str, **kwargs):
+    """Prints given message left-justified to terminal column size.
+
+    Arguments:
+        message {str} -- Message to print.
+
+    Keyword Arguments:
+        fg {str} -- Foreground to give to message with the click.style function.
+        kwargs -- Keyword arguments to use on print.
+    """
+    fg = kwargs.pop("fg")
+    if fg:
+        message = click.style(message, fg=fg)
+
+    print(message.ljust(click.get_terminal_size()[0] - 1), **kwargs)
+
+
 def download_story(story_data: dict):
     """Download the story with the given data to the download directory.
 
     Arguments:
         story_data {dict} -- Data of the story to download.
     """
-    click.secho("Downloading story...", fg=EchoColor.info)
     filename = (story_data["title"] + DOWNLOAD_FORMAT).translate(CHARACTER_CONVERSION)
+    downloaded_bytes = 0
 
     # From: https://stackoverflow.com/a/16696317
     with requests.get(story_data["download-url"], stream=True) as r:
@@ -123,8 +158,16 @@ def download_story(story_data: dict):
         with open(DOWNLOAD_DIR / filename, "wb") as f:
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
+                downloaded_bytes += len(chunk)
 
-    click.secho(f'Saved as "{filename}"', fg=EchoColor.success)
+                ljust_column_print(
+                    f'Downloading "{filename}" [{get_size_str_from_bytes(downloaded_bytes)}]',
+                    fg=EchoColor.info,
+                    flush=True,
+                    end="\r",
+                )
+
+    ljust_column_print(f'Saved as "{filename}"', fg=EchoColor.success)
 
 
 def get_date_from_timestamp(timestamp: float) -> str:
