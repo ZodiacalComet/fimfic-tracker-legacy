@@ -47,9 +47,10 @@ def main(ctx):
 
 @main.command(short_help="Tracks stories and downloads them.")
 @click.argument("urls", nargs=-1)
-@click.option("--skip-download", is_flag=True)
+@click.option("--skip-download", "-s", is_flag=True)
 @click.option(
     "--overwrite",
+    "-o",
     is_flag=True,
     help="Automatically answers the overwrite prompts with Y.",
 )
@@ -186,16 +187,16 @@ def _list(ctx, short):
 
 
 @main.command()
-@click.option("--force", is_flag=True, help="Force download all tracked stories.")
+@click.option("--force", "-f", is_flag=True, help="Force download all tracked stories.")
 @click.option(
     "--assume-yes",
-    "--yes",
+    "-y",
     is_flag=True,
     help="Automatically answers confirmation prompts with Y.",
 )
 @click.option(
     "--assume-no",
-    "--no",
+    "-n",
     is_flag=True,
     help="Automatically answers confirmation prompts with N.",
 )
