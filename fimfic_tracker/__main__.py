@@ -65,6 +65,7 @@ def track(ctx, urls, skip_download, overwrite):
         if not match:
             click.secho(
                 f'"{url}" doesn\'t seem like an URL from a Fimfiction story.',
+                err=True,
                 fg=EchoColor.error,
             )
             continue
@@ -86,7 +87,9 @@ def track(ctx, urls, skip_download, overwrite):
             data = get_story_data(url)
         except ConnectionError as err:
             click.secho(
-                f'Couldn\'t get data from "{url}".\n{err}\n', fg=EchoColor.error
+                f'Couldn\'t get data from "{url}".\n{err}\n',
+                err=True,
+                fg=EchoColor.error,
             )
             continue
 
@@ -94,7 +97,9 @@ def track(ctx, urls, skip_download, overwrite):
             try:
                 download_story(data)
             except ConnectionError as err:
-                click.secho(f"Couldn't download story.\n{err}\n", fg=EchoColor.error)
+                click.secho(
+                    f"Couldn't download story.\n{err}\n", err=True, fg=EchoColor.error
+                )
                 continue
 
         ctx.obj["track-data"][story_id] = data
@@ -117,6 +122,7 @@ def untrack(ctx, story_ids):
         if story_id not in ctx.obj["track-data"]:
             click.secho(
                 f"There is no story of ID {story_id} on the tracking list.",
+                err=True,
                 fg=EchoColor.error,
             )
             continue
@@ -138,7 +144,7 @@ def untrack(ctx, story_ids):
 def _list(ctx, short):
     """List all tracked stories."""
     if not ctx.obj["track-data"]:
-        click.secho("There are no tracked stories.", fg=EchoColor.error)
+        click.secho("There are no tracked stories.", err=True, fg=EchoColor.error)
         return
 
     if short:
@@ -201,18 +207,20 @@ def download(ctx, force, assume_yes, assume_no, story_ids):
     If a story is registered as any status other than 'Incomplete', you will be
     asked if you still want to check for an update on it."""
     if not ctx.obj["track-data"]:
-        click.secho("There are no tracked stories.", fg=EchoColor.error)
+        click.secho("There are no tracked stories.", err=True, fg=EchoColor.error)
         return
 
     if assume_yes and assume_no:
         click.secho(
             'The options "--assume-yes" and "--assume-no" cannot be used at the same time.',
+            err=True,
             fg=EchoColor.error,
         )
         return
     if force and (assume_yes or assume_no):
         click.secho(
             'The option "--force" is not compatible with "--assume-yes" nor "--assume-no".',
+            err=True,
             fg=EchoColor.error,
         )
         return
@@ -258,7 +266,9 @@ def download(ctx, force, assume_yes, assume_no, story_ids):
         try:
             page_data = get_story_data(tracker_data["url"], do_echoes=False)
         except ConnectionError as err:
-            click.secho(f"Couldn't check for story.\n{err}\n", fg=EchoColor.error)
+            click.secho(
+                f"Couldn't check for story.\n{err}\n", err=True, fg=EchoColor.error
+            )
             continue
 
         if not has_an_update(page_data, tracker_data):
@@ -273,7 +283,9 @@ def download(ctx, force, assume_yes, assume_no, story_ids):
         try:
             download_story(page_data)
         except ConnectionError as err:
-            click.secho(f"Couldn't download story.\n{err}\n", fg=EchoColor.error)
+            click.secho(
+                f"Couldn't download story.\n{err}\n", err=True, fg=EchoColor.error
+            )
         else:
             ctx.obj["track-data"][story_id] = page_data
             save_to_track_file(ctx.obj["track-data"])
