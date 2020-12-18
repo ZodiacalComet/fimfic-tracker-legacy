@@ -9,7 +9,6 @@ from .config import DOWNLOAD_DELAY, DOWNLOAD_DIR, TRACKER_FILE, EchoColor
 from .constants import (
     FIMFIC_STORY_URL_REGEX,
     KEYWORDS_TO_HIDE_ON_LIST,
-    VALUE_TO_STATUS_NAME,
     ConfirmState,
     StoryStatus,
 )
@@ -71,7 +70,6 @@ def track(ctx, urls, skip_download, overwrite):
             )
             continue
 
-        url = match.group()
         story_id = match.groupdict()["STORY_ID"]
         if not overwrite and story_id in ctx.obj["track-data"]:
             title = ctx.obj["track-data"][story_id]["title"]
@@ -85,10 +83,10 @@ def track(ctx, urls, skip_download, overwrite):
                 continue
 
         try:
-            data = get_story_data(url)
+            data = get_story_data(story_id)
         except ConnectionError as err:
             click.secho(
-                f'Couldn\'t get data from "{url}".\n{err}\n',
+                f"Couldn't get data from story of ID {story_id}.\n{err}\n",
                 err=True,
                 fg=EchoColor.error,
             )
@@ -96,7 +94,7 @@ def track(ctx, urls, skip_download, overwrite):
 
         if not skip_download:
             try:
-                download_story(data)
+                download_story(story_id, data)
             except ConnectionError as err:
                 click.secho(
                     f"Couldn't download story.\n{err}\n", err=True, fg=EchoColor.error
@@ -180,9 +178,10 @@ def _list(ctx, short):
         echo_value(
             [
                 "completion-status",
-                VALUE_TO_STATUS_NAME.get(tracker_data["completion-status"]),
+                StoryStatus.get_name_from(tracker_data["completion-status"]),
             ]
         )
+
         click.echo()
 
 
@@ -238,20 +237,18 @@ def download(ctx, force, assume_yes, assume_no, story_ids):
     ):
         title = tracker_data["title"]
         if not force:
-            if not tracker_data["completion-status"] == StoryStatus.incomplete.value:
-                status_name = VALUE_TO_STATUS_NAME.get(
-                    tracker_data["completion-status"]
-                )
+            if not tracker_data["completion-status"] == StoryStatus.incomplete:
+                status = StoryStatus.get_name_from(tracker_data["completion-status"])
 
                 msg = click.style(
-                    f'"{title}" ({story_id}) has been marked as "{status_name}" '
-                    "by the author. Do you want to still check for an update on it?",
+                    f'"{title}" ({story_id}) has been marked as "{status}" by the '
+                    "author. Do you want to still check for an update on it?",
                     fg=EchoColor.confirm_prompt,
                 )
                 if not confirm(confirm_state, msg):
                     if confirm_state == ConfirmState.answer_no:
                         click.secho(
-                            f'Skipping "{title}" ({story_id}) marked as "{status_name}".',
+                            f'Skipping "{title}" ({story_id}) marked as "{status}".',
                             fg=EchoColor.info,
                         )
                     else:
@@ -265,7 +262,7 @@ def download(ctx, force, assume_yes, assume_no, story_ids):
         )
 
         try:
-            page_data = get_story_data(tracker_data["url"], do_echoes=False)
+            page_data = get_story_data(story_id, do_echoes=False)
         except ConnectionError as err:
             click.secho(
                 f"Couldn't check for story.\n{err}\n", err=True, fg=EchoColor.error
@@ -282,7 +279,7 @@ def download(ctx, force, assume_yes, assume_no, story_ids):
                 continue
 
         try:
-            download_story(page_data)
+            download_story(story_id, page_data)
         except ConnectionError as err:
             click.secho(
                 f"Couldn't download story.\n{err}\n", err=True, fg=EchoColor.error

@@ -3,24 +3,22 @@ from json import dump as json_dump
 
 import click
 import requests
-from bs4 import BeautifulSoup
-from dateparser import parse as dateparser_parse
 
 from .config import DOWNLOAD_DIR, DOWNLOAD_FORMAT, TRACKER_FILE, EchoColor
 from .constants import (
     CHARACTER_CONVERSION,
-    FIMFIC_BASE_URL,
-    STATUS_CLASS_NAMES,
+    FIMFIC_STORY_API_URL,
     ConfirmState,
+    StoryStatus,
 )
 
 
-def get_story_data(url: str, *, do_echoes=True) -> dict:
-    """Makes a request to the given Fimfiction story URL and extracts relevant
+def get_story_data(story_id: str, *, do_echoes=True) -> dict:
+    """Makes a request to the given Fimfiction story ID and extracts relevant
     data out of it.
 
     Arguments:
-        url {str} -- URL of the story to get the data from.
+        story_id {str} -- ID of the story to get the data from.
 
     Keyword Arguments:
         do_echoes {bool} -- (default: {True})
@@ -28,65 +26,23 @@ def get_story_data(url: str, *, do_echoes=True) -> dict:
     Returns:
         dict -- Story mapping of the following keys:
             - `title` {str} -- Title of the story.
-            - `url` {str} -- Fimfiction URL.
             - `chapter-amt` {int} -- Amount of chapters the story has.
             - `last-update-timestamp` {float} -- Timestamp of the last update.
-            - `download-url` {str} -- Story download URL.
             - `completion-status` {int} -- StoryStatus enum value.
     """
     if do_echoes:
-        click.secho(f'Making a request to "{url}"', fg=EchoColor.info)
+        click.secho(
+            f"Extracting data from the story of ID {story_id}...", fg=EchoColor.info
+        )
 
-    cookies = dict(view_mature="true")
-    page_content = requests.get(url, cookies=cookies).content
-
-    if do_echoes:
-        click.secho("Extracting data...", fg=EchoColor.info)
-
-    soup = BeautifulSoup(page_content, "lxml")
-
-    story_container = soup.find("article", class_="story_container")
-
-    chapter_list = story_container.find("ul", class_="chapters")
-    chapters = chapter_list.find_all("li", recursive=False)
-
-    filter_expander = filter(
-        lambda li: not li.find("div", class_="chapter_expander"), chapters
-    )
-
-    chapters = list(filter_expander)
-
-    def get_story_name() -> str:
-        story_name = story_container.find("a", class_="story_name")
-        return story_name.text.strip()
-
-    def get_timestamp_from_chapter(ch) -> float:
-        date = ch.find("span", class_="date")
-        mobile = date.find("span", class_="mobile")
-
-        date_string = date.text[2 : -len(mobile.text)]
-        return dateparser_parse(date_string, languages=["en"]).timestamp()
-
-    def get_download_url() -> str:
-        download = story_container.find("span", class_="download")
-        for download in download.ul.find_all("a"):
-            if DOWNLOAD_FORMAT not in download.text:
-                continue
-
-            return FIMFIC_BASE_URL + download["href"]
-
-    def get_status() -> int:
-        for class_name, status in STATUS_CLASS_NAMES.items():
-            if story_container.find("span", class_=class_name):
-                return status.value
+    req = requests.get(FIMFIC_STORY_API_URL, params={"story": story_id})
+    story_data = req.json()["story"]
 
     return {
-        "title": get_story_name(),
-        "url": url,
-        "chapter-amt": len(chapters),
-        "last-update-timestamp": max(map(get_timestamp_from_chapter, chapters)),
-        "download-url": get_download_url(),
-        "completion-status": get_status(),
+        "title": story_data["title"],
+        "chapter-amt": len(story_data["chapters"]),
+        "last-update-timestamp": story_data["date_modified"],
+        "completion-status": StoryStatus.get_enum_from(story_data["status"]),
     }
 
 
@@ -143,17 +99,21 @@ def ljust_column_print(message: str, **kwargs):
     print(message.ljust(click.get_terminal_size()[0] - 1), **kwargs)
 
 
-def download_story(story_data: dict):
-    """Download the story with the given data to the download directory.
+def download_story(story_id: str, story_data: dict):
+    """Download the story to the download directory given its ID and data.
 
     Arguments:
+        story_id {dict} -- The ID of the story to download.
         story_data {dict} -- Data of the story to download.
     """
-    filename = (story_data["title"] + DOWNLOAD_FORMAT).translate(CHARACTER_CONVERSION)
+    download_url = DOWNLOAD_FORMAT["url_format"].format(STORY_ID=story_id)
+    filename = (story_data["title"] + "." + DOWNLOAD_FORMAT["extension"]).translate(
+        CHARACTER_CONVERSION
+    )
     downloaded_bytes = 0
 
     # From: https://stackoverflow.com/a/16696317
-    with requests.get(story_data["download-url"], stream=True) as r:
+    with requests.get(download_url, stream=True) as r:
         r.raise_for_status()
         with open(DOWNLOAD_DIR / filename, "wb") as f:
             for chunk in r.iter_content(chunk_size=8192):

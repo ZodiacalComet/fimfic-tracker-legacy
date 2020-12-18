@@ -69,8 +69,6 @@ Now that you have some stories tracked, you can use the `download` command anyti
 
 The downloaded files end up by default in `~/.fimfic-tracker/downloads`.
 
-> Use with moderation, since the most probable you will end up making a lot of requests to the page for each use.
-
 Want to stop tracking a story for whatever reason? You need the ID of the story, which can be seen with the `list` command:
 
 <p align="center"><img src="https://i.imgur.com/uWAfXcu.png"></p>
@@ -99,11 +97,11 @@ Copy the following template, uncomment and edit to your preferences.
 
 ## Download
 # The format in which to download the stories. The valid values are:
-# + ".txt"
-# + ".html"
-# + ".epub"
+# + "txt"
+# + "html"
+# + "epub"
 # Type: str
-#DOWNLOAD_FORMAT = ".txt"
+#DOWNLOAD_FORMAT = "txt"
 
 # The seconds to wait before advancing to the next story.
 # Type: int or float
@@ -126,16 +124,19 @@ Copy the following template, uncomment and edit to your preferences.
 
 ## Acknowledgments
 
-To these other projects, that made this one less of a headache to make!
+To these projects, that made this one less of a headache to make!
 
-- [**BeautifulSoup4**](https://launchpad.net/beautifulsoup): A program designed for screen-scraping HTML.
 - [**Colorama**](https://github.com/tartley/colorama): Simple cross-platform colored terminal text in Python.
 - [**Click**](https://github.com/pallets/click): Python composable command line interface toolkit.
-- [**Dateparser**](https://github.com/scrapinghub/dateparser): python parser for human readable dates.
-- [**lxml**](https://github.com/lxml/lxml): The lxml XML toolkit for Python.
 - [**Requests**](https://github.com/psf/requests): A simple, yet elegant HTTP library.
 
-And to [**Carbon**](https://carbon.now.sh/) for allowing me to make this README a little nicer to look at.
+To [**Carbon**](https://carbon.now.sh/) for allowing me to make this README a little nicer to look at.
+
+And to these other projects that helped with older versions of this one!
+
+- [**BeautifulSoup4**](https://launchpad.net/beautifulsoup): A program designed for screen-scraping HTML.
+- [**Dateparser**](https://github.com/scrapinghub/dateparser): python parser for human readable dates.
+- [**lxml**](https://github.com/lxml/lxml): The lxml XML toolkit for Python.
 
 ## License
 

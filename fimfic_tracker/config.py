@@ -52,18 +52,23 @@ def get_echo_color(name, default):
     return value
 
 
+def get_download_format() -> dict:
+    dl_format = get_value("DOWNLOAD_FORMAT", "txt", str)
+
+    if dl_format not in VALID_DOWNLOAD_FORMATS:
+        raise ValueError(
+            INVALID_SETTING_TYPE_MSG.format(
+                "DOWNLOAD_FORMAT", ", ".join(map(repr, VALID_DOWNLOAD_FORMATS.keys()))
+            )
+        )
+
+    return {"extension": dl_format, "url_format": VALID_DOWNLOAD_FORMATS[dl_format]}
+
+
 DOWNLOAD_DIR = get_value("DOWNLOAD_DIR", DEFAULT_TRACKER_DIR / "downloads", Path)
 TRACKER_FILE = get_value("TRACKER_FILE", DEFAULT_TRACKER_DIR / "track-data.json", Path)
 
-DOWNLOAD_FORMAT = get_value("DOWNLOAD_FORMAT", ".txt", str)
-
-if DOWNLOAD_FORMAT not in VALID_DOWNLOAD_FORMATS:
-    raise ValueError(
-        INVALID_SETTING_TYPE_MSG.format(
-            "DOWNLOAD_FORMAT", ", ".join(map(repr, VALID_DOWNLOAD_FORMATS))
-        )
-    )
-
+DOWNLOAD_FORMAT = get_download_format()
 DOWNLOAD_DELAY = get_value("DOWNLOAD_DELAY", 1, (int, float))
 
 
