@@ -27,6 +27,7 @@ def get_story_data(story_id: str, *, do_echoes=True) -> dict:
         dict -- Story mapping of the following keys:
             - `title` {str} -- Title of the story.
             - `chapter-amt` {int} -- Amount of chapters the story has.
+            - `words` {int} -- Amount of words the story has.
             - `last-update-timestamp` {float} -- Timestamp of the last update.
             - `completion-status` {int} -- StoryStatus enum value.
     """
@@ -41,6 +42,7 @@ def get_story_data(story_id: str, *, do_echoes=True) -> dict:
     return {
         "title": story_data["title"],
         "chapter-amt": len(story_data["chapters"]),
+        "words": story_data["words"],
         "last-update-timestamp": story_data["date_modified"],
         "completion-status": StoryStatus.get_enum_from(story_data["status"]),
     }
@@ -57,7 +59,7 @@ def has_an_update(page_data: dict, tracker_data: dict) -> bool:
     Returns:
         bool -- Whether or not there was an update.
     """
-    for key in ("chapter-amt", "last-update-timestamp"):
+    for key in ("words", "chapter-amt", "last-update-timestamp"):
         if page_data[key] > tracker_data[key]:
             return True
 
