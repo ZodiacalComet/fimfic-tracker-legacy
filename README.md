@@ -101,7 +101,7 @@ Copy the following template, uncomment and edit to your preferences.
 # + "html"
 # + "epub"
 # Type: str
-#DOWNLOAD_FORMAT = "txt"
+#DOWNLOAD_FORMAT = "html"
 
 # The seconds to wait before advancing to the next story.
 # Type: int or float

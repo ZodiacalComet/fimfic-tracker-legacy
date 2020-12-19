@@ -53,7 +53,7 @@ def get_echo_color(name, default):
 
 
 def get_download_format() -> dict:
-    dl_format = get_value("DOWNLOAD_FORMAT", "txt", str)
+    dl_format = get_value("DOWNLOAD_FORMAT", "html", str)
 
     if dl_format not in VALID_DOWNLOAD_FORMATS:
         raise ValueError(
