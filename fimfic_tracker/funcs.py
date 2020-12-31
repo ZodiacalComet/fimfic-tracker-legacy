@@ -7,6 +7,7 @@ import requests
 from .config import DOWNLOAD_DIR, DOWNLOAD_FORMAT, TRACKER_FILE, EchoColor
 from .constants import (
     CHARACTER_CONVERSION,
+    DOWNLOAD_URL_BY_FORMAT,
     FIMFIC_STORY_API_URL,
     ConfirmState,
     StoryStatus,
@@ -108,8 +109,8 @@ def download_story(story_id: str, story_data: dict):
         story_id {dict} -- The ID of the story to download.
         story_data {dict} -- Data of the story to download.
     """
-    download_url = DOWNLOAD_FORMAT["url_format"].format(STORY_ID=story_id)
-    filename = (story_data["title"] + "." + DOWNLOAD_FORMAT["extension"]).translate(
+    download_url = DOWNLOAD_URL_BY_FORMAT[DOWNLOAD_FORMAT].format(STORY_ID=story_id)
+    filename = (story_data["title"] + "." + DOWNLOAD_FORMAT).translate(
         CHARACTER_CONVERSION
     )
     downloaded_bytes = 0

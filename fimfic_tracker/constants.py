@@ -7,7 +7,7 @@ FIMFIC_STORY_URL_REGEX = r"https?://(?:www.)?fimfiction.net/story/(?P<STORY_ID>\
 KEYWORDS_TO_HIDE_ON_LIST = ["last-update-timestamp", "completion-status"]
 # Doesn't seem like these URLs will change anytime soon if not never.
 # So hardcoded they are!
-VALID_DOWNLOAD_FORMATS = {
+DOWNLOAD_URL_BY_FORMAT = {
     extension: FIMFIC_BASE_URL + "/story/download/{STORY_ID}/" + extension
     for extension in ("txt", "html", "epub")
 }

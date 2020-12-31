@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-from .constants import VALID_DOWNLOAD_FORMATS, VALID_ECHO_COLORS
+from .constants import DOWNLOAD_URL_BY_FORMAT, VALID_ECHO_COLORS
 
 DEFAULT_TRACKER_DIR = Path.home() / ".fimfic-tracker"
 CONFIG_FILE_LOCATIONS = [
@@ -52,17 +52,17 @@ def get_echo_color(name, default):
     return value
 
 
-def get_download_format() -> dict:
+def get_download_format() -> str:
     dl_format = get_value("DOWNLOAD_FORMAT", "html", str)
 
-    if dl_format not in VALID_DOWNLOAD_FORMATS:
+    if dl_format not in DOWNLOAD_URL_BY_FORMAT:
         raise ValueError(
             INVALID_SETTING_TYPE_MSG.format(
-                "DOWNLOAD_FORMAT", ", ".join(map(repr, VALID_DOWNLOAD_FORMATS.keys()))
+                "DOWNLOAD_FORMAT", ", ".join(map(repr, DOWNLOAD_URL_BY_FORMAT.keys()))
             )
         )
 
-    return {"extension": dl_format, "url_format": VALID_DOWNLOAD_FORMATS[dl_format]}
+    return dl_format
 
 
 DOWNLOAD_DIR = get_value("DOWNLOAD_DIR", DEFAULT_TRACKER_DIR / "downloads", Path)
