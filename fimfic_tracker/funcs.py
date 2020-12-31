@@ -4,7 +4,6 @@ from json import dump as json_dump
 import click
 import requests
 
-from .config import DOWNLOAD_DIR, DOWNLOAD_FORMAT, TRACKER_FILE, EchoColor
 from .constants import (
     CHARACTER_CONVERSION,
     DOWNLOAD_URL_BY_FORMAT,
@@ -14,12 +13,13 @@ from .constants import (
 )
 
 
-def get_story_data(story_id: str, *, do_echoes=True) -> dict:
+def get_story_data(story_id: str, config: dict, *, do_echoes=True) -> dict:
     """Makes a request to the given Fimfiction story ID and extracts relevant
     data out of it.
 
     Arguments:
         story_id {str} -- ID of the story to get the data from.
+        config {dict} -- Config mapping loaded from `confreader.load_config`.
 
     Keyword Arguments:
         do_echoes {bool} -- (default: {True})
@@ -34,7 +34,8 @@ def get_story_data(story_id: str, *, do_echoes=True) -> dict:
     """
     if do_echoes:
         click.secho(
-            f"Extracting data from the story of ID {story_id}...", fg=EchoColor.info
+            f"Extracting data from the story of ID {story_id}...",
+            fg=config["info_fg_color"],
         )
 
     req = requests.get(FIMFIC_STORY_API_URL, params={"story": story_id})
@@ -102,35 +103,36 @@ def ljust_column_print(message: str, **kwargs):
     print(message.ljust(click.get_terminal_size()[0] - 1), **kwargs)
 
 
-def download_story(story_id: str, story_data: dict):
+def download_story(story_id: str, story_data: dict, config: dict):
     """Download the story to the download directory given its ID and data.
 
     Arguments:
         story_id {dict} -- The ID of the story to download.
         story_data {dict} -- Data of the story to download.
+        config {dict} -- Config mapping loaded from `confreader.load_config`.
     """
-    download_url = DOWNLOAD_URL_BY_FORMAT[DOWNLOAD_FORMAT].format(STORY_ID=story_id)
-    filename = (story_data["title"] + "." + DOWNLOAD_FORMAT).translate(
-        CHARACTER_CONVERSION
-    )
+    dl_format = config["download_format"]
+
+    download_url = DOWNLOAD_URL_BY_FORMAT[dl_format].format(STORY_ID=story_id)
+    filename = (story_data["title"] + "." + dl_format).translate(CHARACTER_CONVERSION)
     downloaded_bytes = 0
 
     # From: https://stackoverflow.com/a/16696317
     with requests.get(download_url, stream=True) as r:
         r.raise_for_status()
-        with open(DOWNLOAD_DIR / filename, "wb") as f:
+        with open(config["download_dir"] / filename, "wb") as f:
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
                 downloaded_bytes += len(chunk)
 
                 ljust_column_print(
                     f'Downloading "{filename}" [{get_size_str_from_bytes(downloaded_bytes)}]',
-                    fg=EchoColor.info,
+                    fg=config["info_fg_color"],
                     flush=True,
                     end="\r",
                 )
 
-    ljust_column_print(f'Saved as "{filename}"', fg=EchoColor.success)
+    ljust_column_print(f'Saved as "{filename}"', fg=config["success_fg_color"])
 
 
 def get_date_from_timestamp(timestamp: float) -> str:
@@ -146,21 +148,23 @@ def get_date_from_timestamp(timestamp: float) -> str:
     return dt.strftime("%d %h %Y")
 
 
-def save_to_track_file(data: dict):
+def save_to_track_file(data: dict, config: dict):
     """Save given data to the track file.
 
     Arguments:
         data {dict} -- Data to save to the track file.
+        config {dict} -- Config mapping loaded from `confreader.load_config`.
     """
-    with TRACKER_FILE.open("w", encoding="utf-8") as f:
+    with config["tracker_file"].open("w", encoding="utf-8") as f:
         json_dump(data, f, ensure_ascii=False, indent=2)
 
 
-def get_highlighted_value(value):
+def get_highlighted_value(value, config: dict):
     """Returns the string representation of the given value highlighted.
 
     Arguments:
         value {Any} -- Value to highlight.
+        config {dict} -- Config mapping loaded from `confreader.load_config`.
 
     Returns:
         str -- The highlighted string representation of the value.
@@ -168,10 +172,10 @@ def get_highlighted_value(value):
 
     def get_color(v):
         if isinstance(v, str):
-            return EchoColor.hl_string
+            return config["highlight_text_color"]
         elif isinstance(v, (int, float)):
-            return EchoColor.hl_number
-        return EchoColor.hl_fallback
+            return config["highlight_number_color"]
+        return config["highlight_other_color"]
 
     return click.style(str(value), fg=get_color(value))
 

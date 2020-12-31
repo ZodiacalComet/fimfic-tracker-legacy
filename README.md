@@ -79,48 +79,12 @@ Now knowing the ID you use the `untrack` command and, like with the `track` comm
 
 ## Configuration
 
-The application searches for a `settings.py` file inside `~/.config/fimfic-tracker` and then in `~/.fimfic-tracker`.
+The application loads its configuration from the following files:
+1. [Default config](https://github.com/ZodiacalComet/fimfic-tracker/blob/master/fimfic_tracker/default_config.py)
+2. `~/.config/fimfic-tracker/settings.py`
+3. `~/.fimfic-tracker/settings.py`
 
-Copy the following template, uncomment and edit to your preferences.
-
-```py
-#from pathlib import Path
-
-## Paths
-# Path to a directory in which to save the downloaded stories.
-# Type: Path
-#DOWNLOAD_DIR = Path.home() / ".fimfic-tracker" / "downloads"
-
-# Path to store the tracker file.
-# Type: Path
-#TRACKER_FILE = Path.home() / ".fimfic-tracker" / "track-data.json"
-
-## Download
-# The format in which to download the stories. The valid values are:
-# + "txt"
-# + "html"
-# + "epub"
-# Type: str
-#DOWNLOAD_FORMAT = "html"
-
-# The seconds to wait before advancing to the next story.
-# Type: int or float
-#DOWNLOAD_DELAY = 1
-
-## Colors
-# The color to use for text in certain output. The list of valid values can be
-# found at: https://click.palletsprojects.com/en/7.x/api/#click.style
-# All of them are of type str.
-
-#INFO_FG_COLOR = "bright_cyan"
-#SUCCESS_FG_COLOR = "bright_green"
-#ERROR_FG_COLOR = "bright_red"
-#CONFIRM_FG_COLOR = "bright_white"
-
-#HIGHLIGHT_TEXT_COLOR = "bright_green"
-#HIGHLIGHT_NUMBER_COLOR = "bright_blue"
-#HIGHLIGHT_OTHER_COLOR = "bright_white"
-```
+Feel free to copy the default config and edit to your preferences.
 
 ## Acknowledgments
 

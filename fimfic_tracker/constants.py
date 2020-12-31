@@ -1,4 +1,5 @@
 from enum import Enum
+from pathlib import Path
 
 FIMFIC_BASE_URL = "https://www.fimfiction.net"
 FIMFIC_STORY_API_URL = FIMFIC_BASE_URL + "/api/story.php"
@@ -11,6 +12,12 @@ DOWNLOAD_URL_BY_FORMAT = {
     extension: FIMFIC_BASE_URL + "/story/download/{STORY_ID}/" + extension
     for extension in ("txt", "html", "epub")
 }
+
+CONFIG_FILE_LOCATIONS = [
+    Path(__file__).parent.absolute() / "default_config.py",
+    Path.home() / ".config" / "fimfic-tracker" / "settings.py",
+    Path.home() / ".fimfic-tracker" / "settings.py",
+]
 
 # https://click.palletsprojects.com/en/7.x/api/#click.style
 VALID_ECHO_COLORS = [
