@@ -47,7 +47,7 @@ git clone https://github.com/ZodiacalComet/fimfic-tracker.git
 cd fimfic-tracker
 
 # With pip
-python3 -m pip install .
+python3 -m pip install -e .
 
 # With pipx
 pipx install -e .
