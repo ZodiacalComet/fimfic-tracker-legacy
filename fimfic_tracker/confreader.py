@@ -42,6 +42,8 @@ CONFIG_VALUES = [
         valid_values=DOWNLOAD_URL_BY_FORMAT.keys(),
     ),
     ConfigValue(name="download_delay", valid_types=(int, float)),
+    ConfigValue(name="download_alt", valid_types=list),
+    ConfigValue(name="download_alt_quiet", valid_types=bool),
 ]
 
 CONFIG_VALUES.extend(

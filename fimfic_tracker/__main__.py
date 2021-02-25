@@ -3,7 +3,6 @@ import re
 from time import sleep
 
 import click
-from requests import ConnectionError
 
 from .confreader import load_config
 from .constants import (
@@ -13,6 +12,7 @@ from .constants import (
     ConfirmState,
     StoryStatus,
 )
+from .exceptions import DownloadError
 from .funcs import (
     confirm,
     download_story,
@@ -101,7 +101,7 @@ def track(ctx, urls, skip_download, overwrite):
 
         try:
             data = get_story_data(story_id, config)
-        except ConnectionError as err:
+        except DownloadError as err:
             click.secho(
                 f"Couldn't get data from story of ID {story_id}.\n{err}\n",
                 err=True,
@@ -112,7 +112,7 @@ def track(ctx, urls, skip_download, overwrite):
         if not skip_download:
             try:
                 download_story(story_id, data, config)
-            except ConnectionError as err:
+            except DownloadError as err:
                 click.secho(
                     f"Couldn't download story.\n{err}\n",
                     err=True,
@@ -295,7 +295,7 @@ def download(ctx, force, assume_yes, assume_no, story_ids):
 
         try:
             page_data = get_story_data(story_id, config, do_echoes=False)
-        except ConnectionError as err:
+        except DownloadError as err:
             click.secho(
                 f"Couldn't check for story.\n{err}\n",
                 err=True,
@@ -314,7 +314,7 @@ def download(ctx, force, assume_yes, assume_no, story_ids):
 
         try:
             download_story(story_id, page_data, config)
-        except ConnectionError as err:
+        except DownloadError as err:
             click.secho(
                 f"Couldn't download story.\n{err}\n",
                 err=True,

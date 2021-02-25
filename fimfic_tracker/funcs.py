@@ -1,3 +1,4 @@
+import subprocess
 from datetime import datetime
 from json import dump as json_dump
 
@@ -11,6 +12,7 @@ from .constants import (
     ConfirmState,
     StoryStatus,
 )
+from .exceptions import CommandError, RequestError
 
 
 def get_story_data(story_id: str, config: dict, *, do_echoes=True) -> dict:
@@ -27,6 +29,7 @@ def get_story_data(story_id: str, config: dict, *, do_echoes=True) -> dict:
     Returns:
         dict -- Story mapping of the following keys:
             - `title` {str} -- Title of the story.
+            - `author` {str} -- Name of the author of the story.
             - `chapter-amt` {int} -- Amount of chapters the story has.
             - `words` {int} -- Amount of words the story has.
             - `last-update-timestamp` {float} -- Timestamp of the last update.
@@ -43,6 +46,7 @@ def get_story_data(story_id: str, config: dict, *, do_echoes=True) -> dict:
 
     return {
         "title": story_data["title"],
+        "author": story_data["author"]["name"],
         "chapter-amt": len(story_data["chapters"]),
         "words": story_data["words"],
         "last-update-timestamp": story_data["date_modified"],
@@ -104,33 +108,94 @@ def ljust_column_print(message: str, **kwargs):
 
 
 def download_story(story_id: str, story_data: dict, config: dict):
-    """Download the story to the download directory given its ID and data.
+    """Download the story in one of the official formats, specified inside of
+    config, to the download directory given its ID and data.
+
+    If download_alt is defined in config, this function will instead fill in
+    its placeholders and excute it as a command. Considering that a returncode
+    of 0 is a successfull execution.
+
+    The placeholders are all the keys present in story_data with the addition
+    of "id", that contains the value of story_id, and "download_dir", with the
+    value of the download directory as specified in config. Those need to be on
+    the style "%(value)s".
 
     Arguments:
         story_id {dict} -- The ID of the story to download.
         story_data {dict} -- Data of the story to download.
         config {dict} -- Config mapping loaded from `confreader.load_config`.
     """
+    download_dir = config["download_dir"]
+    download_alt = config.get("download_alt")
+
+    def make_safe_for_filename(string):
+        return string.translate(CHARACTER_CONVERSION)
+
+    if download_alt:
+        from string import Template
+
+        placeholders = {
+            "id": story_id,
+            **{
+                f"safe_{key}": make_safe_for_filename(story_data[key])
+                for key in ("title", "author")
+            },
+            **{k.replace("-", "_"): v for k, v in story_data.items()},
+        }
+
+        try:
+            cmd = [
+                Template(str(arg)).substitute(**placeholders) for arg in download_alt
+            ]
+        except KeyError as err:
+            msg = "The command can have the following placeholders: {0}\nBut got: {1}.".format(
+                ", ".join(map(repr, placeholders.keys())),
+                ", ".join(map(repr, err.args)),
+            )
+            raise ValueError(msg)
+
+        click.secho(
+            "Executing: " + " ".join(map(lambda s: repr(s) if " " in s else s, cmd)),
+            fg=config["info_fg_color"],
+        )
+
+        kwargs = (
+            {}
+            if not config["download_alt_quiet"]
+            else {"stdout": subprocess.DEVNULL, "stderr": subprocess.DEVNULL}
+        )
+        proc = subprocess.run(cmd, **kwargs)
+
+        returncode = proc.returncode
+        if returncode:
+            raise CommandError(f"Command failed, exited with code {returncode}.")
+
+        click.secho("Command finished successfully.", fg=config["success_fg_color"])
+        return
+
     dl_format = config["download_format"]
 
     download_url = DOWNLOAD_URL_BY_FORMAT[dl_format].format(STORY_ID=story_id)
-    filename = (story_data["title"] + "." + dl_format).translate(CHARACTER_CONVERSION)
+    filename = make_safe_for_filename(story_data["title"] + "." + dl_format)
     downloaded_bytes = 0
 
-    # From: https://stackoverflow.com/a/16696317
-    with requests.get(download_url, stream=True) as r:
-        r.raise_for_status()
-        with open(config["download_dir"] / filename, "wb") as f:
-            for chunk in r.iter_content(chunk_size=8192):
-                f.write(chunk)
-                downloaded_bytes += len(chunk)
+    try:
+        # From: https://stackoverflow.com/a/16696317
+        with requests.get(download_url, stream=True) as r:
+            r.raise_for_status()
+            with open(download_dir / filename, "wb") as f:
+                for chunk in r.iter_content(chunk_size=8192):
+                    f.write(chunk)
+                    downloaded_bytes += len(chunk)
 
-                ljust_column_print(
-                    f'Downloading "{filename}" [{get_size_str_from_bytes(downloaded_bytes)}]',
-                    fg=config["info_fg_color"],
-                    flush=True,
-                    end="\r",
-                )
+                    ljust_column_print(
+                        f'Downloading "{filename}" [{get_size_str_from_bytes(downloaded_bytes)}]',
+                        fg=config["info_fg_color"],
+                        flush=True,
+                        end="\r",
+                    )
+    except requests.ConnectionError as err:
+        raise RequestError(err)
 
     ljust_column_print(f'Saved as "{filename}"', fg=config["success_fg_color"])
 
