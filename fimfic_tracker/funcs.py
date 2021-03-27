@@ -155,7 +155,7 @@ def download_story(story_id: str, story_data: dict, config: dict):
             raise ValueError(msg)
 
         click.secho(
-            "Executing: " + " ".join(map(lambda s: repr(s) if " " in s else s, cmd)),
+            "Executing: " + " ".join(map(lambda s: f'"{s}"' if " " in s else s, cmd)),
             fg=config["info_fg_color"],
         )
 
