@@ -212,7 +212,12 @@ def _list(ctx, short):
 
 
 @main.command()
-@click.option("--force", "-f", is_flag=True, help="Force download all tracked stories.")
+@click.option(
+    "--force",
+    "-f",
+    is_flag=True,
+    help="Download regardless if there was an update or not.",
+)
 @click.option(
     "--assume-yes",
     "-y",
@@ -247,13 +252,6 @@ def download(ctx, force, assume_yes, assume_no, story_ids):
             fg=config["error_fg_color"],
         )
         return
-    if force and (assume_yes or assume_no):
-        click.secho(
-            'The option "--force" is not compatible with "--assume-yes" nor "--assume-no".',
-            err=True,
-            fg=config["error_fg_color"],
-        )
-        return
 
     confirm_state = get_confirm_state(assume_yes, assume_no)
 
@@ -266,17 +264,16 @@ def download(ctx, force, assume_yes, assume_no, story_ids):
         lambda t: true_or_filter_ids(t[0]), ctx.obj["track-data"].items()
     ):
         title = tracker_data["title"]
-        if not force:
-            if not tracker_data["completion-status"] == StoryStatus.incomplete:
-                status = StoryStatus.get_name_from(tracker_data["completion-status"])
+        if not tracker_data["completion-status"] == StoryStatus.incomplete:
+            status = StoryStatus.get_name_from(tracker_data["completion-status"])
 
-                msg = click.style(
-                    f'"{title}" ({story_id}) has been marked as "{status}" by the '
-                    "author. Do you want to still check for an update on it?",
-                    fg=config["confirm_fg_color"],
-                )
-                if not confirm(confirm_state, msg):
-                    continue
+            msg = click.style(
+                f'"{title}" ({story_id}) has been marked as "{status}" by the '
+                "author. Do you want to still check for an update on it?",
+                fg=config["confirm_fg_color"],
+            )
+            if not confirm(confirm_state, msg):
+                continue
 
         click.secho(
             f'Checking if "{title}" ({story_id}) had an update...',
@@ -294,13 +291,12 @@ def download(ctx, force, assume_yes, assume_no, story_ids):
             continue
 
         if not has_an_update(page_data, tracker_data):
-            click.secho("Story didn't have an update.", fg="bright_yellow")
-
-            if force:
-                click.secho("Force downloading story.", fg="bright_yellow")
-            elif not force:
-                click.echo()
+            msg = "Story didn't have an update"
+            if not force:
+                click.secho(f"{msg}.", fg="bright_yellow")
                 continue
+
+            click.secho(f"{msg}, force downloading story.", fg="bright_yellow")
 
         try:
             download_story(story_id, page_data, config)
