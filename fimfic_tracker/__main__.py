@@ -9,7 +9,6 @@ from .constants import (
     CONFIG_FILE_LOCATIONS,
     FIMFIC_STORY_URL_REGEX,
     KEYWORDS_TO_HIDE_ON_LIST,
-    ConfirmState,
     StoryStatus,
 )
 from .exceptions import DownloadError
@@ -277,15 +276,6 @@ def download(ctx, force, assume_yes, assume_no, story_ids):
                     fg=config["confirm_fg_color"],
                 )
                 if not confirm(confirm_state, msg):
-                    if confirm_state == ConfirmState.answer_no:
-                        click.secho(
-                            f'Skipping "{title}" ({story_id}) marked as "{status}".',
-                            fg=config["info_fg_color"],
-                        )
-                    else:
-                        click.secho("Skipping story.", fg=config["info_fg_color"])
-
-                    click.echo()
                     continue
 
         click.secho(

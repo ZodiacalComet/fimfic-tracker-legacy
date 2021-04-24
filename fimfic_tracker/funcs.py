@@ -283,7 +283,9 @@ def confirm(confirm_state: ConfirmState, confirm_msg: str) -> bool:
         and 'no' being False.
     """
     if confirm_state == ConfirmState.answer_yes:
+        click.echo(f"{confirm_msg} [y/N]: Y")
         return True
     elif confirm_state == ConfirmState.answer_no:
+        click.echo(f"{confirm_msg} [y/N]: N")
         return False
     return click.confirm(confirm_msg)
