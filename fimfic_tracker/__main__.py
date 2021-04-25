@@ -273,6 +273,7 @@ def download(ctx, force, assume_yes, assume_no, story_ids):
                 fg=config["confirm_fg_color"],
             )
             if not confirm(confirm_state, msg):
+                click.echo()
                 continue
 
         click.secho(
@@ -293,7 +294,7 @@ def download(ctx, force, assume_yes, assume_no, story_ids):
         if not has_an_update(page_data, tracker_data):
             msg = "Story didn't have an update"
             if not force:
-                click.secho(f"{msg}.", fg="bright_yellow")
+                click.secho(f"{msg}.\n", fg="bright_yellow")
                 continue
 
             click.secho(f"{msg}, force downloading story.", fg="bright_yellow")
