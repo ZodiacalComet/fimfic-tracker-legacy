@@ -1,3 +1,13 @@
+# Update
+
+This version is abandoned, it has been for a very long time.
+The "new" version of the tracker has been on a working state for a while now, but
+its current state makes it difficult to even publish it.
+
+I'll start working on it.
+
+---
+
 # fimfic-tracker
 
 An unnecessary CLI application for tracking stories on [**Fimfiction**](https://www.fimfiction.net/). Because I'm weird and needed an easy way to track some stories without using my account.
