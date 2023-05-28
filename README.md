@@ -1,10 +1,14 @@
 # Update
 
-This version is abandoned, it has been for a very long time.
-The "new" version of the tracker has been on a working state for a while now, but
-its current state makes it difficult to even publish it.
+This version has been abandoned, it continues in the [`fimfic-tracker`](https://github.com/ZodiacalComet/fimfic-tracker) repository.
 
-I'll start working on it.
+If you already have a tracking list, the `migrate` command is provided to take care of re-formatting the data for you.
+It should be noted that it doesn't modify the current tracker file nor does it create a new one, you should redirect the output to
+wherever you need the new file to be.
+
+```sh
+fimfic-tracker migrate > /path/to/migrated/track-data.json
+```
 
 ---
 
