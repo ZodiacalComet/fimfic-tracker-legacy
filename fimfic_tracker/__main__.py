@@ -315,5 +315,20 @@ def download(ctx, force, assume_yes, assume_no, story_ids):
         sleep(config["download_delay"])
 
 
+@main.command()
+@click.pass_context
+def migrate(ctx):
+    """Output current tracker data using the new format.
+
+    Make to easily move your tracked list to the new version of the tracker."""
+    migrated_data = []
+
+    for story_id, tracker_data in ctx.obj["track-data"].items():
+        tracker_data["id"] = int(story_id)
+        migrated_data.append(tracker_data)
+
+    print(json.dumps(migrated_data, ensure_ascii=False))
+
+
 if __name__ == "__main__":
     main(obj={})
