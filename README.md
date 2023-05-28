@@ -42,22 +42,22 @@ Use **pip** to install this project to your system.
 
 ```text
 # Windows
-python -m pip install git+https://github.com/ZodiacalComet/fimfic-tracker.git
+python -m pip install git+https://github.com/ZodiacalComet/fimfic-tracker-legacy.git
 
 # Linux
-python3 -m pip install git+https://github.com/ZodiacalComet/fimfic-tracker.git
+python3 -m pip install git+https://github.com/ZodiacalComet/fimfic-tracker-legacy.git
 ```
 
 Or you can use [**pipx**](https://github.com/pipxproject/pipx#install-pipx) instead, which is my personal preference for this kind of Python applications.
 
 ```text
-pipx install git+https://github.com/ZodiacalComet/fimfic-tracker.git
+pipx install git+https://github.com/ZodiacalComet/fimfic-tracker-legacy.git
 ```
 
 Alternately, you could clone this repository with git and install it locally.
 
 ```text
-git clone https://github.com/ZodiacalComet/fimfic-tracker.git
+git clone https://github.com/ZodiacalComet/fimfic-tracker-legacy.git
 cd fimfic-tracker
 
 # With pip
